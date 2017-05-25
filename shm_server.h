@@ -17,7 +17,9 @@ struct shm_server
 {
     shm_server(const std::string& name) :
       _name(name)
-     {}
+    {
+         shared_memory_object::remove(_name.c_str());
+    }
 
     ~shm_server()
     {
