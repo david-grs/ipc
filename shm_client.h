@@ -28,7 +28,7 @@ struct shm_client
         for (const auto& x : *v)
             std::cout << "child = " << x << std::endl;
 
-        segment.destroy<shm_vector>("shm_vector");
+        //segment.destroy<shm_vector>("shm_vector");
     }
 
 
