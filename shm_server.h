@@ -5,6 +5,7 @@
 #include <boost/interprocess/allocators/allocator.hpp>
 
 #include <vector>
+#include <memory>
 #include <iostream>
 #include <string>
 
@@ -30,24 +31,25 @@ struct shm_server
     {
         std::cout << "starting..." << std::endl;
 
-        //Create a new segment with given name and size
-        managed_shared_memory segment(create_only, _name.c_str(), 65536);
+        _segment = std::make_unique<managed_shared_memory>(create_only, _name.c_str(), 65536);
+        _alloc = std::make_unique<const shm_allocator>(_segment->get_segment_manager());
 
-        //Initialize shared memory STL-compatible allocator
-        const shm_allocator alloc_inst (segment.get_segment_manager());
+        _data = _segment->construct<shm_vector>("shm_vector")(*_alloc);
 
-        //Construct a vector named "shm_vector" in shared memory with argument alloc_inst
-        shm_vector *myvector = segment.construct<shm_vector>("shm_vector")(alloc_inst);
+        for (int i = 0; i < 10; ++i)
+            _data->push_back(i);
+    }
 
-        for(int i = 0; i < 100; ++i)
-            myvector->push_back(i);
-
-        //Check child has destroyed the vector
-        //if(segment.find<MyVector>("MyVector").first)
-        //    return 1;
+    void update()
+    {
+        for (int i = 0; i < 10; ++i)
+            (*_data)[i] = (*_data)[i] + 1;
     }
 
 
 private:
     const std::string _name;
+    std::unique_ptr<managed_shared_memory> _segment;
+    std::unique_ptr<const shm_allocator> _alloc;
+    shm_vector* _data;
 };
