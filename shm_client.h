@@ -20,7 +20,7 @@ struct shm_client
 
     void start()
     {
-        managed_shared_memory segment(open_only, _name);
+        managed_shared_memory segment(open_only, _name.c_str());
 
         shm_vector* v = segment.find<shm_vector>("shm_vector").first;
 
