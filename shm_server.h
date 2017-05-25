@@ -4,6 +4,9 @@
 #include <boost/interprocess/containers/vector.hpp>
 #include <boost/interprocess/allocators/allocator.hpp>
 
+#include <boost/interprocess/sync/scoped_lock.hpp>
+#include <boost/interprocess/sync/interprocess_mutex.hpp>
+
 #include <vector>
 #include <memory>
 #include <iostream>
@@ -35,6 +38,7 @@ struct shm_server
         _alloc = std::make_unique<const shm_allocator>(_segment->get_segment_manager());
 
         _data = _segment->construct<shm_vector>("shm_vector")(*_alloc);
+        _mutex = _segment->find_or_construct<interprocess_mutex>("mtx")();
 
         for (int i = 0; i < 10; ++i)
             _data->push_back(i);
@@ -42,6 +46,8 @@ struct shm_server
 
     void update()
     {
+        scoped_lock<interprocess_mutex> lock{*_mutex};
+        
         for (int i = 0; i < 10; ++i)
             (*_data)[i] = (*_data)[i] + 1;
     }
@@ -51,5 +57,6 @@ private:
     const std::string _name;
     std::unique_ptr<managed_shared_memory> _segment;
     std::unique_ptr<const shm_allocator> _alloc;
+    interprocess_mutex* _mutex;
     shm_vector* _data;
 };
