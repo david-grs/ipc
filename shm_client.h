@@ -4,6 +4,9 @@
 #include <boost/interprocess/containers/vector.hpp>
 #include <boost/interprocess/allocators/allocator.hpp>
 
+#include <boost/interprocess/sync/scoped_lock.hpp>
+#include <boost/interprocess/sync/interprocess_mutex.hpp>
+
 #include <vector>
 #include <iostream>
 
@@ -23,7 +26,9 @@ struct shm_client
         managed_shared_memory segment(open_only, _name.c_str());
 
         shm_vector* v = segment.find<shm_vector>("shm_vector").first;
+        _mutex = segment.find_or_construct<interprocess_mutex>("mtx")();
 
+        scoped_lock<interprocess_mutex> lock{*_mutex};
         int last = (*v)[0];
         for (int i = 1; i < 10; ++i)
         {
@@ -42,4 +47,5 @@ struct shm_client
 
 private:
     const std::string _name;
+    interprocess_mutex* _mutex;
 };
