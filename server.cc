@@ -12,7 +12,10 @@ int main(int argc, char *argv[])
     while (1)
     {
         for (int i = 0; i < 100; ++i)
+        {
+            // std::this_thread::sleep_for(std::chrono::microseconds(1));
             server.update();
+        }
 
         auto now = std::chrono::steady_clock::now();
         if (now - start > std::chrono::seconds(1))
