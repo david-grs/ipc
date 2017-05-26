@@ -44,12 +44,17 @@ struct shm_server
             _data->push_back(i);
     }
 
+    int count() const { return _updates; }
+    void reset() { _updates = 0; }
+
     void update()
     {
         scoped_lock<interprocess_mutex> lock{*_mutex};
-        
+
         for (int i = 0; i < 10; ++i)
             (*_data)[i] = (*_data)[i] + 1;
+
+        ++_updates;
     }
 
 
@@ -59,4 +64,5 @@ private:
     std::unique_ptr<const shm_allocator> _alloc;
     interprocess_mutex* _mutex;
     shm_vector* _data;
+    int _updates = {};
 };
