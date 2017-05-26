@@ -29,6 +29,8 @@ struct shm_client
         _mutex = _segment->find_or_construct<interprocess_mutex>("mtx")();
     }
 
+    int count() const { return _reads; }
+
     void read()
     {
         scoped_lock<interprocess_mutex> lock{*_mutex};
