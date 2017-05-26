@@ -25,22 +25,25 @@ struct shm_client
     {
         managed_shared_memory segment(open_only, _name.c_str());
 
-        shm_vector* v = segment.find<shm_vector>("shm_vector").first;
+        _data = segment.find<shm_vector>("shm_vector").first;
         _mutex = segment.find_or_construct<interprocess_mutex>("mtx")();
+    }
 
+    void read()
+    {
         scoped_lock<interprocess_mutex> lock{*_mutex};
-        int last = (*v)[0];
+        int last = (*_data)[0];
         for (int i = 1; i < 10; ++i)
         {
-            const int elem = (*v)[i];
+            const int elem = (*_data)[i];
 
             if (elem != last + 1)
                 throw 42;
 
-            std::cout << "elem = " << elem << std::endl;
             last = elem;
         }
 
+        ++_reads;
         //segment.destroy<shm_vector>("shm_vector");
     }
 
@@ -48,4 +51,6 @@ struct shm_client
 private:
     const std::string _name;
     interprocess_mutex* _mutex;
+    shm_vector* _data;
+    int _reads = {};
 };
