@@ -30,6 +30,7 @@ struct shm_client
     }
 
     int count() const { return _reads; }
+    void reset() { _reads = 0; }
 
     void read()
     {
