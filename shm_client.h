@@ -23,10 +23,10 @@ struct shm_client
 
     void start()
     {
-        managed_shared_memory segment(open_only, _name.c_str());
+        _segment = std::make_unique<managed_shared_memory>(open_only, _name.c_str());
 
-        _data = segment.find<shm_vector>("shm_vector").first;
-        _mutex = segment.find_or_construct<interprocess_mutex>("mtx")();
+        _data = _segment->find<shm_vector>("shm_vector").first;
+        _mutex = _segment->find_or_construct<interprocess_mutex>("mtx")();
     }
 
     void read()
@@ -50,6 +50,7 @@ struct shm_client
 
 private:
     const std::string _name;
+    std::unique_ptr<managed_shared_memory> _segment;
     interprocess_mutex* _mutex;
     shm_vector* _data;
     int _reads = {};
