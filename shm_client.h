@@ -45,6 +45,9 @@ struct shm_client
             last = elem;
         }
 
+        if (_data->_shm_map.size() != 1)
+            throw 42;
+
         ++_reads;
         //segment.destroy<shm_vector>("shm_vector");
     }
