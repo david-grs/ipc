@@ -27,7 +27,7 @@ struct SharedData
     using shm_vector_alloc = allocator<int, managed_shared_memory::segment_manager>;
     using shm_vector = vector<int, shm_vector_alloc>;
 
-    explicit SharedData(void_allocator& sm) :
+    explicit SharedData(const void_allocator& sm) :
       _shm_map(std::less<shm_string>(), sm),
       _shm_vector(sm)
     {}
