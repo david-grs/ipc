@@ -8,7 +8,6 @@
 #include <boost/interprocess/sync/interprocess_mutex.hpp>
 
 #include <boost/interprocess/sync/interprocess_upgradable_mutex.hpp>
-#include <boost/interprocess/sync/upgradable_lock.hpp>
 #include <boost/interprocess/sync/named_upgradable_mutex.hpp>
 
 #include <vector>
