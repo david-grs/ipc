@@ -1,15 +1,14 @@
 #pragma once
 
 #include <boost/interprocess/managed_shared_memory.hpp>
-#include <boost/interprocess/containers/vector.hpp>
-#include <boost/interprocess/containers/map.hpp>
 #include <boost/interprocess/allocators/allocator.hpp>
-
-#include <string>
-#include <vector>
-#include <map>
+#include <boost/interprocess/containers/map.hpp>
+#include <boost/interprocess/containers/vector.hpp>
+#include <boost/interprocess/containers/string.hpp>
 
 using namespace boost::interprocess;
+
+using void_allocator = allocator<void, managed_shared_memory::segment_manager>;
 
 struct data
 {
@@ -19,16 +18,19 @@ struct data
 
 struct SharedData
 {
-    explicit SharedData(managed_shared_memory::segment_manager* sm) :
-      _shm_map(std::less<std::string>(), sm),
-      _shm_vector(sm)
-    {}
+    using shm_char_alloc = allocator<char, managed_shared_memory::segment_manager>;
+    using shm_string = basic_string<char, std::char_traits<char>, shm_char_alloc>;
 
-    using shm_map_alloc = allocator<std::pair<std::string, data>, managed_shared_memory::segment_manager>;
-    using shm_map = std::map<std::string, data, std::less<std::string>, shm_map_alloc>;
+    using shm_map_alloc = allocator<std::pair<const shm_string, data>, managed_shared_memory::segment_manager>;
+    using shm_map = map<shm_string, data, std::less<shm_string>, shm_map_alloc>;
 
     using shm_vector_alloc = allocator<int, managed_shared_memory::segment_manager>;
-    using shm_vector = std::vector<int, shm_vector_alloc>;
+    using shm_vector = vector<int, shm_vector_alloc>;
+
+    explicit SharedData(void_allocator& sm) :
+      _shm_map(std::less<shm_string>(), sm),
+      _shm_vector(sm)
+    {}
 
     shm_map _shm_map;
     shm_vector _shm_vector;
