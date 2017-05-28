@@ -27,11 +27,13 @@ struct shm_server
       _name(name)
     {
          shared_memory_object::remove(_name.c_str());
+         shared_memory_object::remove("banana");
     }
 
     ~shm_server()
     {
         shared_memory_object::remove(_name.c_str());
+         shared_memory_object::remove("banana");
     }
 
     void start()
