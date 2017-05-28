@@ -45,7 +45,7 @@ struct shm_client
             last = elem;
         }
 
-        if (_data->_shm_map.size() != 1)
+        if (_data->_shm_map.size() != 2)
             throw 42;
 
         ++_reads;
