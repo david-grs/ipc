@@ -6,6 +6,9 @@
 #include <boost/interprocess/containers/vector.hpp>
 #include <boost/interprocess/containers/string.hpp>
 
+#include <boost/interprocess/sync/interprocess_mutex.hpp>
+#include <boost/interprocess/sync/interprocess_upgradable_mutex.hpp>
+
 using namespace boost::interprocess;
 
 using void_allocator = allocator<void, managed_shared_memory::segment_manager>;
@@ -34,5 +37,6 @@ struct SharedData
 
     shm_map _shm_map;
     shm_vector _shm_vector;
+    interprocess_upgradable_mutex _mutex;
 };
 
