@@ -3,8 +3,6 @@
 #include "shared.h"
 
 #include <boost/interprocess/managed_shared_memory.hpp>
-#include <boost/interprocess/allocators/allocator.hpp>
-
 #include <boost/interprocess/sync/scoped_lock.hpp>
 
 #include <memory>
