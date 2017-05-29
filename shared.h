@@ -9,6 +9,8 @@
 #include <boost/interprocess/sync/interprocess_mutex.hpp>
 #include <boost/interprocess/sync/interprocess_upgradable_mutex.hpp>
 
+namespace shm { namespace detail {
+
 namespace ipc = boost::interprocess;
 
 template <typename T>
@@ -22,7 +24,7 @@ struct data
     int i;
 };
 
-struct SharedData
+struct shared_data
 {
     using shm_char_alloc = shm_alloc<char>;
     using shm_string = ipc::basic_string<char, std::char_traits<char>, shm_char_alloc>;
@@ -33,7 +35,7 @@ struct SharedData
     using shm_int_alloc = shm_alloc<int>;
     using shm_vector = ipc::vector<int, shm_int_alloc>;
 
-    explicit SharedData(const void_allocator& sm) :
+    explicit shared_data(const void_allocator& sm) :
       _shm_map(std::less<shm_string>(), sm),
       _shm_vector(sm)
     {}
@@ -43,3 +45,8 @@ struct SharedData
     ipc::interprocess_upgradable_mutex _mutex;
 };
 
+}
+
+using shared_data = detail::shared_data;
+
+}

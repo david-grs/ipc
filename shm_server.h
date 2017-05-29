@@ -9,34 +9,36 @@
 #include <iostream>
 #include <string>
 
-using namespace boost::interprocess;
+namespace shm { namespace detail {
 
-struct shm_server
+namespace ipc = boost::interprocess;
+
+struct server
 {
-    shm_server(const std::string& name) :
+    server(const std::string& name) :
       _name(name)
     {
-         shared_memory_object::remove(_name.c_str());
+         ipc::shared_memory_object::remove(_name.c_str());
     }
 
-    ~shm_server()
+    ~server()
     {
-        shared_memory_object::remove(_name.c_str());
+        ipc::shared_memory_object::remove(_name.c_str());
     }
 
     void start()
     {
         std::cout << "starting..." << std::endl;
 
-        _segment = std::make_unique<managed_shared_memory>(create_only, _name.c_str(), 65536);
+        _segment = std::make_unique<ipc::managed_shared_memory>(ipc::create_only, _name.c_str(), 65536);
         _alloc = std::make_unique<const void_allocator>(_segment->get_segment_manager());
 
-        _data = _segment->construct<SharedData>("blarp")(*_alloc);
+        _data = _segment->construct<shared_data>("blarp")(*_alloc);
         for (int i = 0; i < 10; ++i)
             _data->_shm_vector.push_back(i);
 
-        _data->_shm_map.emplace(SharedData::shm_string("foo", *_alloc), data{10.0, 3});
-        _data->_shm_map.emplace(SharedData::shm_string("bar", *_alloc), data{4.0, 11});
+        _data->_shm_map.emplace(shared_data::shm_string("foo", *_alloc), data{10.0, 3});
+        _data->_shm_map.emplace(shared_data::shm_string("bar", *_alloc), data{4.0, 11});
     }
 
     int count() const { return _updates; }
@@ -44,7 +46,7 @@ struct shm_server
 
     void update()
     {
-        scoped_lock<interprocess_upgradable_mutex> lock{_data->_mutex};
+        ipc::scoped_lock<ipc::interprocess_upgradable_mutex> lock{_data->_mutex};
 
         for (int i = 0; i < 10; ++i)
             _data->_shm_vector[i] = _data->_shm_vector[i] + 1;
@@ -55,8 +57,15 @@ struct shm_server
 
 private:
     const std::string _name;
-    std::unique_ptr<managed_shared_memory> _segment;
+    std::unique_ptr<ipc::managed_shared_memory> _segment;
     std::unique_ptr<const void_allocator> _alloc;
-    SharedData* _data;
+    shared_data* _data;
     int _updates = {};
 };
+
+}
+
+using server = detail::server;
+
+}
+

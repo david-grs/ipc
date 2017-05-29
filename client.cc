@@ -4,7 +4,7 @@
 
 int main(int argc, char *argv[])
 {
-    shm_client client("foob4r");
+    shm::client client("foob4r");
     client.start();
 
     auto start = std::chrono::steady_clock::now();

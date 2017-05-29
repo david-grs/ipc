@@ -5,7 +5,7 @@
 
 int main(int argc, char *argv[])
 {
-    shm_server server("foob4r");
+    shm::server server("foob4r");
     server.start();
 
     auto start = std::chrono::steady_clock::now();

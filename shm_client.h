@@ -7,18 +7,21 @@
 
 #include <iostream>
 
-using namespace boost::interprocess;
+namespace shm { namespace detail {
 
-struct shm_client
+namespace ipc = boost::interprocess;
+
+struct client
 {
-    explicit shm_client(const std::string& name) :
+
+    explicit client(const std::string& name) :
       _name(name)
     {}
 
     void start()
     {
-        _segment = std::make_unique<managed_shared_memory>(open_only, _name.c_str());
-        _data = _segment->find<SharedData>("blarp").first;
+        _segment = std::make_unique<ipc::managed_shared_memory>(ipc::open_only, _name.c_str());
+        _data = _segment->find<shared_data>("blarp").first;
     }
 
     int count() const { return _reads; }
@@ -26,7 +29,7 @@ struct shm_client
 
     void read()
     {
-        sharable_lock<interprocess_upgradable_mutex> lock{_data->_mutex};
+        ipc::sharable_lock<ipc::interprocess_upgradable_mutex> lock{_data->_mutex};
 
         int last = _data->_shm_vector[0];
         for (int i = 1; i < 10; ++i)
@@ -49,7 +52,15 @@ struct shm_client
 
 private:
     const std::string _name;
-    std::unique_ptr<managed_shared_memory> _segment;
-    SharedData* _data;
+    std::unique_ptr<ipc::managed_shared_memory> _segment;
+    shared_data* _data;
     int _reads = {};
 };
+
+}
+
+using client = detail::client;
+
+}
+
+
