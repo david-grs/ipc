@@ -15,6 +15,34 @@ namespace shm { namespace detail {
 
 namespace ipc = boost::interprocess;
 
+struct base_data
+{
+    virtual void modify()
+    {
+    }
+
+
+};
+
+template <typename Object>
+struct data : public base_data
+{
+    explicit data(Object* obj) :
+      _obj(obj)
+    {}
+
+    template <typename Callable>
+    void modify(Callable f)
+    {
+        ipc::scoped_lock<ipc::interprocess_upgradable_mutex> lock{_mutex};
+        f();
+    }
+
+private:
+    ipc::interprocess_upgradable_mutex _mutex;
+    Object* _obj;
+};
+
 struct server
 {
     server(const std::string& name) :
@@ -37,18 +65,15 @@ struct server
     }
 
     template <typename Object>
-    void construct(const std::string& name)
+    data<Object> construct(const std::string& name)
     {
         Object* obj = _segment->construct<Object>(name.c_str())(*_alloc);
         const bool inserted = _objects.emplace(name, obj);
 
         if (!inserted)
             throw std::runtime_error("shm: object " + name + " already inserted");
-    }
 
-    template <typename T, typename Callable>
-    void modify(const std::string& name)
-    {
+        return data(obj);
     }
 
 #if 0
