@@ -24,8 +24,8 @@ struct client
         _data = _segment->find<shared_data>("blarp").first;
     }
 
-    int count() const { return _reads; }
-    void reset() { _reads = 0; }
+    int count() const { return _updates; }
+    void reset() { _updates = 0; }
 
     void read()
     {
@@ -45,8 +45,18 @@ struct client
         if (_data->_shm_map.size() != 2)
             throw 42;
 
-        ++_reads;
+        ++_updates;
         //segment.destroy<shm_vector>("shm_vector");
+    }
+
+    void write()
+    {
+        ipc::scoped_lock<ipc::interprocess_upgradable_mutex> lock{_data->_mutex};
+
+        for (int i = 0; i < 10; ++i)
+            _data->_shm_vector[i] = _data->_shm_vector[i] + 1;
+
+        ++_updates;
     }
 
 
@@ -54,7 +64,7 @@ private:
     const std::string _name;
     std::unique_ptr<ipc::managed_shared_memory> _segment;
     shared_data* _data;
-    int _reads = {};
+    int _updates = {};
 };
 
 }

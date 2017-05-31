@@ -12,6 +12,8 @@ int main(int argc, char *argv[])
     {
         for (int i = 0; i < 100; ++i)
             client.read();
+        for (int i = 0; i < 100; ++i)
+            client.write();
 
         auto now = std::chrono::steady_clock::now();
         if (now - start > std::chrono::seconds(1))
