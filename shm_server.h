@@ -32,6 +32,13 @@ struct data : public base_data
     {}
 
     template <typename Callable>
+    void read(Callable f)
+    {
+        ipc::sharable_lock<ipc::interprocess_upgradable_mutex> lock{_mutex};
+        f();
+    }
+
+    template <typename Callable>
     void modify(Callable f)
     {
         ipc::scoped_lock<ipc::interprocess_upgradable_mutex> lock{_mutex};
