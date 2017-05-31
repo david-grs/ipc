@@ -31,6 +31,11 @@ struct data : public base_data
       _obj(obj)
     {}
 
+    ~data()
+    {
+        _segment->destroy<Object>(name.c_str());
+    }
+
     template <typename Callable>
     void read(Callable f)
     {
