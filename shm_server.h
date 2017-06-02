@@ -17,11 +17,6 @@ namespace ipc = boost::interprocess;
 
 struct base_data
 {
-    virtual void modify()
-    {
-    }
-
-
 };
 
 template <typename Object>
