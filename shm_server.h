@@ -58,6 +58,9 @@ struct server
 
     ~server()
     {
+        for (const auto& p : _deleters)
+            p.second();
+
         ipc::shared_memory_object::remove(_name.c_str());
     }
 
@@ -73,7 +76,7 @@ struct server
     data<Object> construct(const std::string& name)
     {
         Object* obj = _segment->construct<Object>(name.c_str())(*_alloc);
-        const bool inserted = _objects.emplace(name, obj);
+        const bool inserted = _deleters.emplace(name, [=]() { _segment->destroy<Object>(name.c_str()); });
 
         if (!inserted)
             throw std::runtime_error("shm: object " + name + " already inserted");
@@ -84,7 +87,15 @@ struct server
     template <typename Object>
     void destroy(const std::string& name)
     {
-        _segment->destroy<Object>(name.c_str());
+        auto it = _deleters.find(name);
+        if (it == _deleters.cend())
+        {
+            assert(false);
+            return;
+        }
+
+        it->second();
+        _deleters.erase(it);
     }
 
 #if 0
@@ -116,7 +127,7 @@ private:
     const std::string _name;
     std::unique_ptr<ipc::managed_shared_memory> _segment;
     std::unique_ptr<const void_allocator> _alloc;
-    std::unordered_map<std::string, boost::any> _objects;
+    std::unordered_map<std::string, std::function<void()>> _deleters;
     int _updates = {};
 };
 
