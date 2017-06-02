@@ -18,7 +18,7 @@ using shm_alloc = ipc::allocator<T, ipc::managed_shared_memory::segment_manager>
 
 using void_allocator = shm_alloc<void>;
 
-struct data
+struct mmdata
 {
     double d;
     int i;
@@ -29,8 +29,8 @@ struct shared_data
     using shm_char_alloc = shm_alloc<char>;
     using shm_string = ipc::basic_string<char, std::char_traits<char>, shm_char_alloc>;
 
-    using shm_mapv_alloc = shm_alloc<std::pair<const shm_string, data>>;
-    using shm_map = ipc::map<shm_string, data, std::less<shm_string>, shm_mapv_alloc>;
+    using shm_mapv_alloc = shm_alloc<std::pair<const shm_string, mmdata>>;
+    using shm_map = ipc::map<shm_string, mmdata, std::less<shm_string>, shm_mapv_alloc>;
 
     using shm_int_alloc = shm_alloc<int>;
     using shm_vector = ipc::vector<int, shm_int_alloc>;
