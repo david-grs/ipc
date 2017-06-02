@@ -31,11 +31,6 @@ struct data : public base_data
       _obj(obj)
     {}
 
-    ~data()
-    {
-        _segment->destroy<Object>(name.c_str());
-    }
-
     template <typename Callable>
     void read(Callable f)
     {
@@ -85,7 +80,13 @@ struct server
         if (!inserted)
             throw std::runtime_error("shm: object " + name + " already inserted");
 
-        return data(obj);
+        return data<Object>(obj);
+    }
+
+    template <typename Object>
+    void destroy(const std::string& name)
+    {
+        _segment->destroy<Object>(name.c_str());
     }
 
 #if 0
