@@ -31,6 +31,9 @@ struct data : public base_data
       _obj(obj)
     {}
 
+    data(const data&) =delete;
+    data& operator=(const data&) =delete;
+
     template <typename Callable>
     void read(Callable f)
     {
