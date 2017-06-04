@@ -6,6 +6,9 @@
 #include <boost/interprocess/containers/vector.hpp>
 #include <boost/interprocess/containers/string.hpp>
 
+#include <boost/interprocess/sync/scoped_lock.hpp>
+#include <boost/interprocess/sync/sharable_lock.hpp>
+
 #include <boost/interprocess/sync/interprocess_mutex.hpp>
 #include <boost/interprocess/sync/interprocess_upgradable_mutex.hpp>
 
@@ -45,8 +48,45 @@ struct shared_data
     ipc::interprocess_upgradable_mutex _mutex;
 };
 
+
+struct base_data
+{
+};
+
+template <typename Object>
+struct data : public base_data
+{
+    explicit data(Object* obj) :
+      _obj(obj)
+    {}
+
+    data(const data&) =delete;
+    data& operator=(const data&) =delete;
+
+    template <typename Callable>
+    void read(Callable f)
+    {
+        ipc::sharable_lock<ipc::interprocess_upgradable_mutex> lock{_mutex};
+        f(*_obj);
+    }
+
+    template <typename Callable>
+    void modify(Callable f)
+    {
+        ipc::scoped_lock<ipc::interprocess_upgradable_mutex> lock{_mutex};
+        f(*_obj);
+    }
+
+private:
+    ipc::interprocess_upgradable_mutex _mutex;
+    Object* _obj;
+};
+
 }
 
 using shared_data = detail::shared_data;
+
+template <typename Object>
+using data = detail::data<Object>;
 
 }

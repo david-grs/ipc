@@ -3,7 +3,6 @@
 #include "shared.h"
 
 #include <boost/interprocess/managed_shared_memory.hpp>
-#include <boost/interprocess/sync/scoped_lock.hpp>
 #include <boost/any.hpp>
 
 #include <memory>
@@ -14,39 +13,6 @@
 namespace shm { namespace detail {
 
 namespace ipc = boost::interprocess;
-
-struct base_data
-{
-};
-
-template <typename Object>
-struct data : public base_data
-{
-    explicit data(Object* obj) :
-      _obj(obj)
-    {}
-
-    data(const data&) =delete;
-    data& operator=(const data&) =delete;
-
-    template <typename Callable>
-    void read(Callable f)
-    {
-        ipc::sharable_lock<ipc::interprocess_upgradable_mutex> lock{_mutex};
-        f(*_obj);
-    }
-
-    template <typename Callable>
-    void modify(Callable f)
-    {
-        ipc::scoped_lock<ipc::interprocess_upgradable_mutex> lock{_mutex};
-        f(*_obj);
-    }
-
-private:
-    ipc::interprocess_upgradable_mutex _mutex;
-    Object* _obj;
-};
 
 struct server
 {
