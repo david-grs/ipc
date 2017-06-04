@@ -3,7 +3,6 @@
 #include "shared.h"
 
 #include <boost/interprocess/managed_shared_memory.hpp>
-#include <boost/any.hpp>
 
 #include <memory>
 #include <iostream>
