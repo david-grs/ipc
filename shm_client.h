@@ -23,6 +23,13 @@ struct client
         _data = _segment->find<shared_data>("blarp").first;
     }
 
+    template <typename Object>
+    data<Object> find(const std::string& name)
+    {
+        Object* obj = _segment->find<Object>(name.c_str()).first;
+        return data<Object>(obj);
+    }
+
     int count() const { return _updates; }
     void reset() { _updates = 0; }
 
