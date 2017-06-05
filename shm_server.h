@@ -38,15 +38,15 @@ struct server
     }
 
     template <typename Object>
-    data<Object> construct(const std::string& name)
+    data<Object>* construct(const std::string& name)
     {
-        Object* obj = _segment->construct<Object>(name.c_str())(*_alloc);
-        const bool inserted = _deleters.emplace(name, [=]() { _segment->destroy<Object>(name.c_str()); });
+        data<Object>* obj = _segment->construct<data<Object>>(name.c_str())(*_alloc);
+        const bool inserted = _deleters.emplace(name, [=]() { _segment->destroy<data<Object>>(name.c_str()); });
 
         if (!inserted)
             throw std::runtime_error("shm: object " + name + " already inserted");
 
-        return data<Object>(obj);
+        return obj;
     }
 
     template <typename Object>
