@@ -20,7 +20,6 @@ struct client
     void start()
     {
         _segment = std::make_unique<ipc::managed_shared_memory>(ipc::open_only, _name.c_str());
-        _data = _segment->find<shared_data>("blarp").first;
     }
 
     template <typename Object>
@@ -30,6 +29,7 @@ struct client
         return data<Object>(obj);
     }
 
+#if 0
     void read()
     {
         ipc::sharable_lock<ipc::interprocess_upgradable_mutex> lock{_data->_mutex};
@@ -58,12 +58,11 @@ struct client
         for (int i = 0; i < 10; ++i)
             _data->_shm_vector[i] = _data->_shm_vector[i] + 1;
     }
-
+#endif
 
 private:
     const std::string _name;
     std::unique_ptr<ipc::managed_shared_memory> _segment;
-    shared_data* _data;
 };
 
 }
