@@ -30,9 +30,6 @@ struct client
         return data<Object>(obj);
     }
 
-    int count() const { return _updates; }
-    void reset() { _updates = 0; }
-
     void read()
     {
         ipc::sharable_lock<ipc::interprocess_upgradable_mutex> lock{_data->_mutex};
@@ -51,7 +48,6 @@ struct client
         if (_data->_shm_map.size() != 2)
             throw 42;
 
-        ++_updates;
         //segment.destroy<shm_vector>("shm_vector");
     }
 
@@ -61,8 +57,6 @@ struct client
 
         for (int i = 0; i < 10; ++i)
             _data->_shm_vector[i] = _data->_shm_vector[i] + 1;
-
-        ++_updates;
     }
 
 
@@ -70,7 +64,6 @@ private:
     const std::string _name;
     std::unique_ptr<ipc::managed_shared_memory> _segment;
     shared_data* _data;
-    int _updates = {};
 };
 
 }

@@ -8,6 +8,8 @@ int main(int argc, char *argv[])
     client.start();
 
     auto start = std::chrono::steady_clock::now();
+    int64_t ops = 0;
+
     while (1)
     {
         for (int i = 0; i < 100; ++i)
@@ -18,9 +20,9 @@ int main(int argc, char *argv[])
         auto now = std::chrono::steady_clock::now();
         if (now - start > std::chrono::seconds(1))
         {
-            std::cout << double(client.count()) / std::chrono::duration_cast<std::chrono::milliseconds>(now - start).count() << "ops/ms" << std::endl;
+            std::cout << double(ops) / std::chrono::duration_cast<std::chrono::milliseconds>(now - start).count() << "ops/ms" << std::endl;
             start = now;
-            client.reset();
+            ops = 0;
         }
     }
     return 0;
