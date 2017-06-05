@@ -72,7 +72,7 @@ struct data : public base_data
     }
 
     template <typename Callable>
-    void read(Callable f)
+    void read(Callable f) const
     {
         ipc::sharable_lock<ipc::interprocess_upgradable_mutex> lock{_mutex};
         f(_obj);
@@ -86,7 +86,7 @@ struct data : public base_data
     }
 
 private:
-    ipc::interprocess_upgradable_mutex _mutex;
+    mutable ipc::interprocess_upgradable_mutex _mutex;
     Object _obj;
 };
 
