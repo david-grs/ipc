@@ -63,6 +63,18 @@ struct data : public base_data
     data(const data&) =delete;
     data& operator=(const data&) =delete;
 
+    data(data&& d) :
+      _mutex(std::move(d._mutex)),
+      _obj(std::move(d._obj))
+    {}
+
+    data& operator=(data&& d)
+    {
+        _mutex = std::move(d._mutex);
+        _obj = std::move(d._obj);
+        return *this;
+    }
+
     template <typename Callable>
     void read(Callable f)
     {
