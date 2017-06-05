@@ -56,10 +56,6 @@ struct base_data
 template <typename Object>
 struct data : public base_data
 {
-    explicit data(Object* obj) :
-      _obj(obj)
-    {}
-
     data(const data&) =delete;
     data& operator=(const data&) =delete;
 
@@ -79,19 +75,19 @@ struct data : public base_data
     void read(Callable f)
     {
         ipc::sharable_lock<ipc::interprocess_upgradable_mutex> lock{_mutex};
-        f(*_obj);
+        f(_obj);
     }
 
     template <typename Callable>
     void modify(Callable f)
     {
         ipc::scoped_lock<ipc::interprocess_upgradable_mutex> lock{_mutex};
-        f(*_obj);
+        f(_obj);
     }
 
 private:
     ipc::interprocess_upgradable_mutex _mutex;
-    Object* _obj;
+    Object _obj;
 };
 
 }
