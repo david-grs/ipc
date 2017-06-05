@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
     shm::client client("foob4r");
     client.start();
 
-    auto data = client.find<shm::shared_data>("shared_data");
+    auto& data = *client.find<shm::shared_data>("shared_data");
 
     auto start = std::chrono::steady_clock::now();
     int64_t ops = 0;
@@ -47,6 +47,7 @@ int main(int argc, char *argv[])
     {
         for (int i = 0; i < 100; ++i)
             read(data);
+
         for (int i = 0; i < 100; ++i)
             write(data);
 

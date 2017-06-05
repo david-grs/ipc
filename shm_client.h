@@ -23,10 +23,9 @@ struct client
     }
 
     template <typename Object>
-    data<Object> find(const std::string& name)
+    data<Object>* find(const std::string& name)
     {
-        Object* obj = _segment->find<Object>(name.c_str()).first;
-        return data<Object>(obj);
+        return _segment->find<data<Object>>(name.c_str()).first;
     }
 
 #if 0
