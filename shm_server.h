@@ -72,9 +72,6 @@ struct server
         _data->_shm_map.emplace(shared_data::shm_string("bar", *_alloc), data{4.0, 11});
 #endif
 
-    int count() const { return _updates; }
-    void reset() { _updates = 0; }
-
     void update()
     {
 #if 0
@@ -93,7 +90,6 @@ private:
     std::unique_ptr<ipc::managed_shared_memory> _segment;
     std::unique_ptr<const void_allocator> _alloc;
     std::unordered_map<std::string, std::function<void()>> _deleters;
-    int _updates = {};
 };
 
 }
