@@ -12,14 +12,28 @@
 #include <boost/interprocess/sync/interprocess_mutex.hpp>
 #include <boost/interprocess/sync/interprocess_upgradable_mutex.hpp>
 
-namespace shm { namespace detail {
-
-namespace ipc = boost::interprocess;
+namespace shm {
 
 template <typename T>
-using shm_alloc = ipc::allocator<T, ipc::managed_shared_memory::segment_manager>;
+using alloc = boost::interprocess::allocator<T, boost::interprocess::managed_shared_memory::segment_manager>;
 
-using void_allocator = shm_alloc<void>;
+using void_allocator = alloc<void>;
+
+using char_alloc = alloc<char>;
+using string = boost::interprocess::basic_string<char, std::char_traits<char>, char_alloc>;
+
+template <typename K, typename V>
+using mapv_alloc = alloc<std::pair<const K, V>>;
+
+template <typename K, typename V>
+using map = boost::interprocess::map<K, V, std::less<K>, mapv_alloc<K, V>>;
+
+template <typename K>
+using vector = boost::interprocess::vector<K, alloc<K>>;
+
+namespace detail {
+
+namespace ipc = boost::interprocess;
 
 struct mmdata
 {
@@ -29,22 +43,13 @@ struct mmdata
 
 struct shared_data
 {
-    using shm_char_alloc = shm_alloc<char>;
-    using shm_string = ipc::basic_string<char, std::char_traits<char>, shm_char_alloc>;
-
-    using shm_mapv_alloc = shm_alloc<std::pair<const shm_string, mmdata>>;
-    using shm_map = ipc::map<shm_string, mmdata, std::less<shm_string>, shm_mapv_alloc>;
-
-    using shm_int_alloc = shm_alloc<int>;
-    using shm_vector = ipc::vector<int, shm_int_alloc>;
-
     explicit shared_data(const void_allocator& sm) :
-      _shm_map(std::less<shm_string>(), sm),
+      _shm_map(std::less<string>(), sm),
       _shm_vector(sm)
     {}
 
-    shm_map _shm_map;
-    shm_vector _shm_vector;
+    map<string, mmdata> _shm_map;
+    vector<int> _shm_vector;
     ipc::interprocess_upgradable_mutex _mutex;
 };
 
@@ -97,6 +102,7 @@ private:
 }
 
 using shared_data = detail::shared_data;
+using mmdata = detail::mmdata;
 
 template <typename Object>
 using data = detail::data<Object>;
