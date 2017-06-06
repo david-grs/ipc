@@ -41,7 +41,7 @@ struct server
     data<Object>* construct(const std::string& name)
     {
         data<Object>* obj = _segment->construct<data<Object>>(name.c_str())(*_alloc);
-        const bool inserted = _deleters.emplace(name, [=]() { _segment->destroy<data<Object>>(name.c_str()); });
+        const bool inserted = _deleters.emplace(name, [=]() { _segment->destroy<data<Object>>(name.c_str()); }).second;
 
         if (!inserted)
             throw std::runtime_error("shm: object " + name + " already inserted");
@@ -62,28 +62,6 @@ struct server
         it->second();
         _deleters.erase(it);
     }
-
-#if 0
-        _data = _segment->construct<shared_data>("blarp")(*_alloc);
-        for (int i = 0; i < 10; ++i)
-            _data->_shm_vector.push_back(i);
-
-        _data->_shm_map.emplace(shared_data::shm_string("foo", *_alloc), data{10.0, 3});
-        _data->_shm_map.emplace(shared_data::shm_string("bar", *_alloc), data{4.0, 11});
-#endif
-
-    void update()
-    {
-#if 0
-        ipc::scoped_lock<ipc::interprocess_upgradable_mutex> lock{_data->_mutex};
-
-        for (int i = 0; i < 10; ++i)
-            _data->_shm_vector[i] = _data->_shm_vector[i] + 1;
-
-        ++_updates;
-#endif
-    }
-
 
 private:
     const std::string _name;

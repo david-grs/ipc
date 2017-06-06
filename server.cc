@@ -8,6 +8,17 @@ int main(int argc, char *argv[])
     shm::server server("foob4r");
     server.start();
 
+    auto& data = *server.construct<shm::shared_data>("shared_data");
+
+    data.modify([](shm::shared_data& data)
+    {
+        for (int i = 0; i < 10; ++i)
+            data._shm_vector.push_back(i);
+
+        //data._shm_map.emplace(shared_data::shm_string("foo", *_alloc), data{10.0, 3});
+        //data._shm_map.emplace(shared_data::shm_string("bar", *_alloc), data{4.0, 11});
+    });
+
     auto start = std::chrono::steady_clock::now();
     int64_t ops = 0;
 
@@ -15,8 +26,12 @@ int main(int argc, char *argv[])
     {
         for (int i = 0; i < 100; ++i)
         {
-            // std::this_thread::sleep_for(std::chrono::microseconds(1));
-            server.update();
+            data.modify([](shm::shared_data& data)
+            {
+                for (int i = 0; i < 10; ++i)
+                    data._shm_vector[i] = data._shm_vector[i] + 1;
+            });
+
             ++ops;
         }
 
