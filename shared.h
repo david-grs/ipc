@@ -56,6 +56,10 @@ struct base_data
 template <typename Object>
 struct data : public base_data
 {
+    explicit data(const void_allocator& sm) :
+      _obj(sm)
+    {}
+
     data(const data&) =delete;
     data& operator=(const data&) =delete;
 
