@@ -1,7 +1,7 @@
 #include "shm_client.h"
 
 #include <chrono>
-
+#include <iostream>
 
 void read(shm::data<shm::shared_data>& client)
 {
