@@ -37,6 +37,8 @@ struct server
         _alloc = std::make_unique<const void_allocator>(_segment->get_segment_manager());
     }
 
+    const void_allocator& allocator() const { return *_alloc; }
+
     template <typename Object>
     data<Object>* construct(const std::string& name)
     {
