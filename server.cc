@@ -8,9 +8,10 @@ int main(int argc, char *argv[])
     shm::server server("foob4r");
     server.start();
 
-    auto& data = *server.construct<shm::shared_data>("shared_data");
+    //auto& data = *server.construct<shm::shared_data>("shared_data");
+    auto data = server.construct2<shm::shared_data>("shared_data");
 
-    data.modify([&server](shm::shared_data& data)
+    data->modify([&server](shm::shared_data& data)
     {
         for (int i = 0; i < 10; ++i)
             data._shm_vector.push_back(i);
@@ -26,7 +27,7 @@ int main(int argc, char *argv[])
     {
         for (int i = 0; i < 100; ++i)
         {
-            data.modify([](shm::shared_data& data)
+            data->modify([](shm::shared_data& data)
             {
                 for (int i = 0; i < 10; ++i)
                     data._shm_vector[i] = data._shm_vector[i] + 1;
