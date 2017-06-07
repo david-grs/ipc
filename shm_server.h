@@ -52,6 +52,17 @@ struct server
     }
 
     template <typename Object>
+    using ShmDeleter = std::function<void(data<Object>*)>;
+
+    template <typename Object>
+    std::unique_ptr<data<Object>, ShmDeleter<Object>> construct2(const std::string& name)
+    {
+        data<Object>* obj = _segment->construct<data<Object>>(name.c_str())(*_alloc);
+        std::unique_ptr<data<Object>, ShmDeleter<Object>> ptr{obj, [&](data<Object>*) { _segment->destroy<data<Object>>(name.c_str()); }};
+        return std::move(ptr);
+    }
+
+    template <typename Object>
     void destroy(const std::string& name)
     {
         auto it = _deleters.find(name);
