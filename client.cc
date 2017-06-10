@@ -3,6 +3,14 @@
 #include <chrono>
 #include <iostream>
 
+extern "C"
+{
+#include <signal.h>
+}
+
+// boo
+volatile bool run = true;
+
 int main(int argc, char *argv[])
 {
     shm::client client("foob4r");
@@ -13,7 +21,10 @@ int main(int argc, char *argv[])
     auto start = std::chrono::steady_clock::now();
     int64_t ops = 0;
 
-    while (1)
+    ::signal(15, [](int) { run = false; });
+    ::signal(2, [](int)  { run = false; });
+
+    while (run)
     {
         for (int i = 0; i < 100; ++i)
         {
