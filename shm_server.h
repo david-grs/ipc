@@ -58,8 +58,10 @@ struct server
     std::unique_ptr<data<Object>, ShmDeleter<Object>> construct2(const std::string& name)
     {
         data<Object>* obj = _segment->construct<data<Object>>(name.c_str())(*_alloc);
-        std::unique_ptr<data<Object>, ShmDeleter<Object>> ptr{obj, [&](data<Object>*) { _segment->destroy<data<Object>>(name.c_str()); }};
-        return std::move(ptr);
+        return std::unique_ptr<data<Object>, ShmDeleter<Object>>{obj, [&](data<Object>*)
+        {
+            _segment->destroy<data<Object>>(name.c_str());
+        }};
     }
 
     template <typename Object>
