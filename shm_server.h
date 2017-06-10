@@ -30,7 +30,7 @@ struct server
     {
         std::cout << "starting..." << std::endl;
 
-        _segment = std::make_unique<ipc::managed_shared_memory>(ipc::create_only, _name.c_str(), 65536);
+        _segment = std::make_shared<ipc::managed_shared_memory>(ipc::create_only, _name.c_str(), 65536);
         _alloc = std::make_unique<const void_allocator>(_segment->get_segment_manager());
     }
 
@@ -43,15 +43,15 @@ struct server
     std::unique_ptr<data<Object>, ShmDeleter<Object>> construct(const std::string& name)
     {
         data<Object>* obj = _segment->construct<data<Object>>(name.c_str())(*_alloc);
-        return std::unique_ptr<data<Object>, ShmDeleter<Object>>{obj, [&](data<Object>*)
+        return std::unique_ptr<data<Object>, ShmDeleter<Object>>{obj, [segment = _segment, name](data<Object>*)
         {
-            _segment->destroy<data<Object>>(name.c_str());
+            segment->destroy<data<Object>>(name.c_str());
         }};
     }
 
 private:
     const std::string _name;
-    std::unique_ptr<ipc::managed_shared_memory> _segment;
+    std::shared_ptr<ipc::managed_shared_memory> _segment;
     std::unique_ptr<const void_allocator> _alloc;
 };
 
