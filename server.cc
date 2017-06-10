@@ -13,19 +13,18 @@ volatile bool run = true;
 
 int main(int argc, char *argv[])
 {
-    shm::server server("foob4r");
-    server.start();
+    auto server = std::make_unique<shm::server>("foob4r");
+    server->start();
 
-    //auto& data = *server.construct<shm::shared_data>("shared_data");
-    auto data = server.construct2<shm::shared_data>("shared_data");
+    auto data = server->construct<shm::shared_data>("shared_data");
 
     data->modify([&server](shm::shared_data& data)
     {
         for (int i = 0; i < 10; ++i)
             data._shm_vector.push_back(i);
 
-        data._shm_map.emplace(shm::string("foo", server.allocator()), shm::mmdata{10.0, 3});
-        data._shm_map.emplace(shm::string("bar", server.allocator()), shm::mmdata{4.0, 11});
+        data._shm_map.emplace(shm::string("foo", server->allocator()), shm::mmdata{10.0, 3});
+        data._shm_map.emplace(shm::string("bar", server->allocator()), shm::mmdata{4.0, 11});
     });
 
     auto start = std::chrono::steady_clock::now();
@@ -55,6 +54,8 @@ int main(int argc, char *argv[])
             ops = 0;
         }
     }
+
+    server.reset();
 
     return 0;
 };
