@@ -23,9 +23,6 @@ struct server
 
     ~server()
     {
-        for (const auto& p : _deleters)
-            p.second();
-
         ipc::shared_memory_object::remove(_name.c_str());
     }
 
@@ -40,22 +37,10 @@ struct server
     const void_allocator& allocator() const { return *_alloc; }
 
     template <typename Object>
-    data<Object>* construct(const std::string& name)
-    {
-        data<Object>* obj = _segment->construct<data<Object>>(name.c_str())(*_alloc);
-        const bool inserted = _deleters.emplace(name, [=]() { _segment->destroy<data<Object>>(name.c_str()); }).second;
-
-        if (!inserted)
-            throw std::runtime_error("shm: object " + name + " already inserted");
-
-        return obj;
-    }
-
-    template <typename Object>
     using ShmDeleter = std::function<void(data<Object>*)>;
 
     template <typename Object>
-    std::unique_ptr<data<Object>, ShmDeleter<Object>> construct2(const std::string& name)
+    std::unique_ptr<data<Object>, ShmDeleter<Object>> construct(const std::string& name)
     {
         data<Object>* obj = _segment->construct<data<Object>>(name.c_str())(*_alloc);
         return std::unique_ptr<data<Object>, ShmDeleter<Object>>{obj, [&](data<Object>*)
@@ -64,25 +49,10 @@ struct server
         }};
     }
 
-    template <typename Object>
-    void destroy(const std::string& name)
-    {
-        auto it = _deleters.find(name);
-        if (it == _deleters.cend())
-        {
-            assert(false);
-            return;
-        }
-
-        it->second();
-        _deleters.erase(it);
-    }
-
 private:
     const std::string _name;
     std::unique_ptr<ipc::managed_shared_memory> _segment;
     std::unique_ptr<const void_allocator> _alloc;
-    std::unordered_map<std::string, std::function<void()>> _deleters;
 };
 
 }
