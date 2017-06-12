@@ -10,13 +10,12 @@ struct mmdata
 
 struct shared_data
 {
-    explicit shared_data(const void_allocator& sm) :
-      _shm_map(std::less<string>(), sm),
+    explicit shared_data(const shm::void_allocator& sm) :
+      _shm_map(std::less<shm::string>(), sm),
       _shm_vector(sm)
     {}
 
-    map<string, mmdata> _shm_map;
-    vector<int> _shm_vector;
-    ipc::interprocess_upgradable_mutex _mutex;
+    shm::map<shm::string, mmdata> _shm_map;
+    shm::vector<int> _shm_vector;
 };
 

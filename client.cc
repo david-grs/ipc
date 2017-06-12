@@ -1,4 +1,5 @@
-#include "shm_client.h"
+#include "common.h"
+#include "libs/shm_client.h"
 
 #include <chrono>
 #include <iostream>
@@ -16,7 +17,7 @@ int main(int argc, char *argv[])
     shm::client client("foob4r");
     client.start();
 
-    auto& data = client.find<shm::shared_data>("shared_data");
+    auto& data = client.find<shared_data>("shared_data");
 
     auto start = std::chrono::steady_clock::now();
     int64_t ops = 0;
@@ -28,7 +29,7 @@ int main(int argc, char *argv[])
     {
         for (int i = 0; i < 100; ++i)
         {
-            data.read([](const shm::shared_data& data)
+            data.read([](const shared_data& data)
             {
                 int last = data._shm_vector[0];
                 for (int i = 1; i < 10; ++i)
@@ -48,7 +49,7 @@ int main(int argc, char *argv[])
 
         for (int i = 0; i < 100; ++i)
         {
-            data.modify([](shm::shared_data& data)
+            data.modify([](shared_data& data)
             {
                 for (int i = 0; i < 10; ++i)
                     data._shm_vector[i] = data._shm_vector[i] + 1;
