@@ -35,24 +35,6 @@ namespace detail {
 
 namespace ipc = boost::interprocess;
 
-struct mmdata
-{
-    double d;
-    int i;
-};
-
-struct shared_data
-{
-    explicit shared_data(const void_allocator& sm) :
-      _shm_map(std::less<string>(), sm),
-      _shm_vector(sm)
-    {}
-
-    map<string, mmdata> _shm_map;
-    vector<int> _shm_vector;
-    ipc::interprocess_upgradable_mutex _mutex;
-};
-
 template <typename Object>
 struct data
 {
@@ -95,9 +77,6 @@ private:
 };
 
 }
-
-using shared_data = detail::shared_data;
-using mmdata = detail::mmdata;
 
 template <typename Object>
 using data = detail::data<Object>;
