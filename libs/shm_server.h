@@ -1,6 +1,6 @@
 #pragma once
 
-#include "shared.h"
+#include "shm_types.h"
 
 #include <boost/interprocess/managed_shared_memory.hpp>
 

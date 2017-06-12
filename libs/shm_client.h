@@ -1,10 +1,6 @@
 #pragma once
 
-#include "shared.h"
-
-#include <boost/interprocess/managed_shared_memory.hpp>
-
-#include <iostream>
+#include "shm_types.h"
 
 namespace shm { namespace detail {
 
