@@ -7,7 +7,6 @@
 #include <memory>
 #include <iostream>
 #include <string>
-#include <unordered_map>
 
 namespace shm { namespace detail {
 
