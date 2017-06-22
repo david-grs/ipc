@@ -3,6 +3,7 @@
 #include <boost/interprocess/managed_shared_memory.hpp>
 #include <boost/interprocess/allocators/allocator.hpp>
 #include <boost/interprocess/containers/map.hpp>
+#include <boost/interprocess/containers/set.hpp>
 #include <boost/interprocess/containers/vector.hpp>
 #include <boost/interprocess/containers/string.hpp>
 
@@ -27,6 +28,9 @@ using map_alloc = alloc<std::pair<const K, V>>;
 
 template <typename K, typename V>
 using map = boost::interprocess::map<K, V, std::less<K>, map_alloc<K, V>>;
+
+template <typename K>
+using set = boost::interprocess::set<K, std::less<K>, alloc<K>>;
 
 template <typename K>
 using vector = boost::interprocess::vector<K, alloc<K>>;
