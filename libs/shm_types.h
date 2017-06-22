@@ -23,10 +23,10 @@ using char_alloc = alloc<char>;
 using string = boost::interprocess::basic_string<char, std::char_traits<char>, char_alloc>;
 
 template <typename K, typename V>
-using mapv_alloc = alloc<std::pair<const K, V>>;
+using map_alloc = alloc<std::pair<const K, V>>;
 
 template <typename K, typename V>
-using map = boost::interprocess::map<K, V, std::less<K>, mapv_alloc<K, V>>;
+using map = boost::interprocess::map<K, V, std::less<K>, map_alloc<K, V>>;
 
 template <typename K>
 using vector = boost::interprocess::vector<K, alloc<K>>;
