@@ -6,6 +6,8 @@
 #include <boost/interprocess/containers/set.hpp>
 #include <boost/interprocess/containers/list.hpp>
 #include <boost/interprocess/containers/vector.hpp>
+#include <boost/interprocess/containers/deque.hpp>
+#include <boost/interprocess/containers/stable_vector.hpp>
 #include <boost/interprocess/containers/string.hpp>
 
 #include <boost/interprocess/sync/scoped_lock.hpp>
@@ -21,23 +23,16 @@ using alloc = boost::interprocess::allocator<T, boost::interprocess::managed_sha
 
 using void_allocator = alloc<void>;
 
-using char_alloc = alloc<char>;
-using string = boost::interprocess::basic_string<char, std::char_traits<char>, char_alloc>;
+using string = boost::interprocess::basic_string<char, std::char_traits<char>, alloc<char>>;
 
-template <typename K, typename V>
-using map_alloc = alloc<std::pair<const K, V>>;
+template <typename K, typename V> using map_alloc = alloc<std::pair<const K, V>>;
+template <typename K, typename V> using map = boost::interprocess::map<K, V, std::less<K>, map_alloc<K, V>>;
 
-template <typename K, typename V>
-using map = boost::interprocess::map<K, V, std::less<K>, map_alloc<K, V>>;
-
-template <typename K>
-using set = boost::interprocess::set<K, std::less<K>, alloc<K>>;
-
-template <typename V>
-using list = boost::interprocess::list<V, alloc<V>>;
-
-template <typename K>
-using vector = boost::interprocess::vector<K, alloc<K>>;
+template <typename K> using set = boost::interprocess::set<K, std::less<K>, alloc<K>>;
+template <typename V> using list = boost::interprocess::list<V, alloc<V>>;
+template <typename V> using deque = boost::interprocess::deque<V, alloc<V>>;
+template <typename K> using vector = boost::interprocess::vector<K, alloc<K>>;
+template <typename K> using stable_vector = boost::interprocess::stable_vector<K, alloc<K>>;
 
 namespace detail {
 
