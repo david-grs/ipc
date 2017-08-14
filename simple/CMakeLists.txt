@@ -1,3 +1,5 @@
+include_directories(..) # libs
+
 add_executable(simple_server server.cc)
 target_link_libraries(simple_server pthread rt)
 
