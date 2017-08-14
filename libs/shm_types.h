@@ -64,19 +64,43 @@ struct data
 		return *this;
 	}
 
-	template <typename Callable>
-	void read(Callable f) const
-	{
-		ipc::sharable_lock<ipc::interprocess_upgradable_mutex> lock{_mutex};
-		f(_obj);
-	}
+    template <typename Callable>
+    void read(Callable f) const
+    {
+        ipc::sharable_lock<ipc::interprocess_upgradable_mutex> lock{_mutex};
+        f(_obj);
+    }
 
-	template <typename Callable>
-	void modify(Callable f)
-	{
-		ipc::scoped_lock<ipc::interprocess_upgradable_mutex> lock{_mutex};
-		f(_obj);
-	}
+    template <typename Callable>
+    bool try_read(Callable f) const
+    {
+        ipc::sharable_lock<ipc::interprocess_upgradable_mutex> lock{_mutex, ipc::try_to_lock};
+        if (lock.owns())
+        {
+            f(_obj);
+            return true;
+        }
+        return false;
+    }
+
+    template <typename Callable>
+    void modify(Callable f)
+    {
+        ipc::scoped_lock<ipc::interprocess_upgradable_mutex> lock{_mutex};
+        f(_obj);
+    }
+
+    template <typename Callable>
+    bool try_modify(Callable f)
+    {
+        ipc::scoped_lock<ipc::interprocess_upgradable_mutex> lock{_mutex, ipc::try_to_lock};
+        if (lock.owns())
+        {
+            f(_obj);
+            return true;
+        }
+        return false;
+    }
 
 private:
 	mutable ipc::interprocess_upgradable_mutex _mutex;

@@ -16,6 +16,8 @@ extern "C"
 // boo
 volatile bool run = true;
 
+namespace ipc = boost::interprocess;
+
 int main(int argc, char *argv[])
 {
 	auto server = std::make_unique<shm::server>("foob4r");
@@ -37,6 +39,16 @@ int main(int argc, char *argv[])
 
 	std::vector<set> local_sets;
 
+    auto update_set = [&](shared_data& data)
+    {
+        data._sets.resize(local_sets.size());
+        for (std::size_t i = 0; i < local_sets.size(); ++i)
+        {
+            set& s = data._sets[i];
+            s.points = local_sets[i].points;
+        }
+    };
+
 	while (run)
 	{
 		if (current)
@@ -50,25 +62,15 @@ int main(int argc, char *argv[])
 			int n = q.front();
 			q.erase(q.begin()); // pop_front()
 
-			// trylock n
-			// if (ok)
-			//   current = n;
-			//   break
-			// else
-			//   q.push_back(n);
-
-			current = n;
+            if (sets[n]->try_modify(update_set))
+            {
+                current = n;
+            }
+            else
+            {
+                q.push_back(n);
+            }
 		}
-
-		sets[*current]->modify([&](shared_data& data)
-		{
-			data._sets.resize(local_sets.size());
-			for (std::size_t i = 0; i < local_sets.size(); ++i)
-			{
-				set& s = data._sets[i];
-				s.points = local_sets[i].points;
-			}
-		});
 
 		current_set->modify([&](std::size_t& s)
 		{
