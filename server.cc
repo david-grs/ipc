@@ -49,6 +49,9 @@ int main(int argc, char *argv[])
         }
     };
 
+    for (std::size_t i = 0; i < 16; ++i)
+      q.push_back(i);
+
 	while (run)
 	{
 		if (current)
@@ -77,6 +80,8 @@ int main(int argc, char *argv[])
             s.set_index = *current;
             s.new_set = true;
             s.cond_new_set.notify_all();
+
+            ++ops;
 		});
 
 		auto now = std::chrono::steady_clock::now();
