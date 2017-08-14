@@ -41,42 +41,42 @@ namespace ipc = boost::interprocess;
 template <typename Object>
 struct data
 {
-    explicit data(const void_allocator& sm) :
-      _obj(sm)
-    {}
+	explicit data(const void_allocator& sm) :
+	  _obj(sm)
+	{}
 
-    data(const data&) =delete;
-    data& operator=(const data&) =delete;
+	data(const data&) =delete;
+	data& operator=(const data&) =delete;
 
-    data(data&& d) :
-      _mutex(std::move(d._mutex)),
-      _obj(std::move(d._obj))
-    {}
+	data(data&& d) :
+	  _mutex(std::move(d._mutex)),
+	  _obj(std::move(d._obj))
+	{}
 
-    data& operator=(data&& d)
-    {
-        _mutex = std::move(d._mutex);
-        _obj = std::move(d._obj);
-        return *this;
-    }
+	data& operator=(data&& d)
+	{
+		_mutex = std::move(d._mutex);
+		_obj = std::move(d._obj);
+		return *this;
+	}
 
-    template <typename Callable>
-    void read(Callable f) const
-    {
-        ipc::sharable_lock<ipc::interprocess_upgradable_mutex> lock{_mutex};
-        f(_obj);
-    }
+	template <typename Callable>
+	void read(Callable f) const
+	{
+		ipc::sharable_lock<ipc::interprocess_upgradable_mutex> lock{_mutex};
+		f(_obj);
+	}
 
-    template <typename Callable>
-    void modify(Callable f)
-    {
-        ipc::scoped_lock<ipc::interprocess_upgradable_mutex> lock{_mutex};
-        f(_obj);
-    }
+	template <typename Callable>
+	void modify(Callable f)
+	{
+		ipc::scoped_lock<ipc::interprocess_upgradable_mutex> lock{_mutex};
+		f(_obj);
+	}
 
 private:
-    mutable ipc::interprocess_upgradable_mutex _mutex;
-    Object _obj;
+	mutable ipc::interprocess_upgradable_mutex _mutex;
+	Object _obj;
 };
 
 }

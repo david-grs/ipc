@@ -14,44 +14,60 @@ namespace ipc = boost::interprocess;
 
 struct server
 {
-    server(const std::string& name) :
-      _name(name)
-    {
-         ipc::shared_memory_object::remove(_name.c_str());
-    }
+	server(const std::string& name) :
+	  _name(name)
+	{
+		 ipc::shared_memory_object::remove(_name.c_str());
+	}
 
-    ~server()
-    {
-        ipc::shared_memory_object::remove(_name.c_str());
-    }
+	~server()
+	{
+		ipc::shared_memory_object::remove(_name.c_str());
+	}
 
-    void start()
-    {
-        std::cout << "starting..." << std::endl;
+	void start()
+	{
+		std::cout << "starting..." << std::endl;
 
-        _segment = std::make_shared<ipc::managed_shared_memory>(ipc::create_only, _name.c_str(), 65536);
-        _alloc = std::make_unique<const void_allocator>(_segment->get_segment_manager());
-    }
+		_segment = std::make_shared<ipc::managed_shared_memory>(ipc::create_only, _name.c_str(), 65536);
+		_alloc = std::make_unique<const void_allocator>(_segment->get_segment_manager());
+	}
 
-    const void_allocator& allocator() const { return *_alloc; }
+	const void_allocator& allocator() const { return *_alloc; }
 
-    template <typename Object>
-    using ShmDeleter = std::function<void(data<Object>*)>;
+	template<typename T>
+	using ShmUniquePtr = std::unique_ptr<T, std::function<void(T*)>>;
 
-    template <typename Object>
-    std::unique_ptr<data<Object>, ShmDeleter<Object>> construct(const std::string& name)
-    {
-        data<Object>* obj = _segment->construct<data<Object>>(name.c_str())(*_alloc);
-        return std::unique_ptr<data<Object>, ShmDeleter<Object>>{obj, [segment = _segment, name](data<Object>*)
-        {
-            segment->destroy<data<Object>>(name.c_str());
-        }};
-    }
+	template <typename Object>
+	ShmUniquePtr<data<Object>>
+	construct(const std::string& name)
+	{
+		data<Object>* obj = _segment->construct<data<Object>>(name.c_str())(*_alloc);
+		return ShmUniquePtr<data<Object>>{obj, [segment = _segment, name](data<Object>*)
+		{
+			segment->destroy<data<Object>>(name.c_str());
+		}};
+	}
+
+	template <typename Object>
+	ShmUniquePtr<std::vector<data<Object>*>>
+	construct(const std::string& name, std::size_t count)
+	{
+		data<Object>* obj = _segment->construct<data<Object>>(name.c_str())[count](*_alloc);
+		ShmUniquePtr<std::vector<data<Object>*>> v{new std::vector<data<Object>*>{}, [segment = _segment, name](std::vector<data<Object>*>*)
+		{
+			segment->destroy<data<Object>>(name.c_str());
+		}};
+
+		for (std::size_t i = 0; i < count; ++i)
+			v->push_back(obj++);
+		return v;
+	}
 
 private:
-    const std::string _name;
-    std::shared_ptr<ipc::managed_shared_memory> _segment;
-    std::unique_ptr<const void_allocator> _alloc;
+	const std::string _name;
+	std::shared_ptr<ipc::managed_shared_memory> _segment;
+	std::unique_ptr<const void_allocator> _alloc;
 };
 
 }
