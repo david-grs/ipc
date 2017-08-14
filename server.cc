@@ -23,8 +23,8 @@ int main(int argc, char *argv[])
 	auto server = std::make_unique<shm::server>("foob4r");
 	server->start();
 
-	auto usets = server->construct<shared_data>("shared_data", 16);
-	std::vector<shm::data<shared_data>*> sets = *usets;
+	auto usets = server->construct<shared_sets>("shared_sets", 16);
+	std::vector<shm::data<shared_sets>*> sets = *usets;
 
 	auto current_set = server->construct<std::size_t>("current_set");
 
@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
 
 	std::vector<set> local_sets;
 
-    auto update_set = [&](shared_data& data)
+    auto update_set = [&](shared_sets& data)
     {
         data._sets.resize(local_sets.size());
         for (std::size_t i = 0; i < local_sets.size(); ++i)
@@ -76,8 +76,6 @@ int main(int argc, char *argv[])
 		{
 			s = *current;
 		});
-
-		// send notification
 
 		auto now = std::chrono::steady_clock::now();
 		if (now - start > std::chrono::seconds(1))

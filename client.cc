@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
 	shm::client client("foob4r");
 	client.start();
 
-	std::vector<shm::data<shared_data>*> sets = client.find_array<shared_data>("shared_data");
+	std::vector<shm::data<shared_sets>*> sets = client.find_array<shared_sets>("shared_sets");
 	shm::data<std::size_t>& current_set = client.find<std::size_t>("current_set");
 
 	auto start = std::chrono::steady_clock::now();
@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
 			last_set = s;
 		});
 
-		sets[last_set]->read([&](const shared_data& data)
+		sets[last_set]->read([&](const shared_sets& data)
 		{
 			local_sets.resize(data._sets.size());
 			for (std::size_t i = 0; i < data._sets.size(); ++i)
