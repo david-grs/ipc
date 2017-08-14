@@ -13,13 +13,15 @@ extern "C"
 // boo
 volatile bool run = true;
 
+namespace ipc = boost::interprocess;
+
 int main(int argc, char *argv[])
 {
 	shm::client client("foob4r");
 	client.start();
 
-	std::vector<shm::data<shared_sets>*> sets = client.find_array<shared_sets>("shared_sets");
-	shm::data<std::size_t>& current_set = client.find<std::size_t>("current_set");
+	auto sets = client.find_array2<shared_sets>("shared_sets");
+	auto& curr_set = client.find2<current_set>("current_set");
 
 	auto start = std::chrono::steady_clock::now();
 	int64_t ops = 0;
@@ -27,19 +29,23 @@ int main(int argc, char *argv[])
 	::signal(15, [](int) { run = false; });
 	::signal(2, [](int)  { run = false; });
 
-	int last_set;
+	std::size_t set_index;
 	std::vector<set> local_sets;
 
 	while (run)
 	{
 		// wait for notification
 
-		current_set.read([&](int s)
+		curr_set.modify_lock([&](current_set& s, ipc::scoped_lock<ipc::interprocess_mutex>& lock)
 		{
-			last_set = s;
+            if (!s.new_set)
+                s.cond_new_set.wait(lock);
+
+			set_index = s.set_index;
+            s.new_set = false;
 		});
 
-		sets[last_set]->read([&](const shared_sets& data)
+		sets[set_index]->read([&](const shared_sets& data)
 		{
 			local_sets.resize(data._sets.size());
 			for (std::size_t i = 0; i < data._sets.size(); ++i)

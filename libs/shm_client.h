@@ -18,26 +18,47 @@ struct client
 		_segment = std::make_unique<ipc::managed_shared_memory>(ipc::open_only, _name.c_str());
 	}
 
-	template <typename Object>
-	data<Object>& find(const std::string& name)
-	{
-		std::pair<data<Object>*,std::size_t> p = _segment->find<data<Object>>(name.c_str());
-		assert(p.second == 1);
+    template <typename Object>
+    data<Object>& find(const std::string& name)
+    {
+        std::pair<data<Object>*,std::size_t> p = _segment->find<data<Object>>(name.c_str());
+        assert(p.second == 1);
 
-		return *p.first;
-	}
+        return *p.first;
+    }
 
-	template <typename Object>
-	std::vector<data<Object>*> find_array(const std::string& name)
-	{
-		std::vector<data<Object>*> v;
+    template <typename Object>
+    std::vector<data<Object>*> find_array(const std::string& name)
+    {
+        std::vector<data<Object>*> v;
 
-		std::pair<data<Object>*,std::size_t> p = _segment->find<data<Object>>(name.c_str());
-		for (std::size_t i = 0; i < p.second; ++i)
-			v.push_back(p.first++);
+        std::pair<data<Object>*,std::size_t> p = _segment->find<data<Object>>(name.c_str());
+        for (std::size_t i = 0; i < p.second; ++i)
+            v.push_back(p.first++);
 
-		return v;
-	}
+        return v;
+    }
+
+    template <typename Object>
+    data_notifier<Object>& find2(const std::string& name)
+    {
+        std::pair<data_notifier<Object>*,std::size_t> p = _segment->find<data_notifier<Object>>(name.c_str());
+        assert(p.second == 1);
+
+        return *p.first;
+    }
+
+    template <typename Object>
+    std::vector<data_notifier<Object>*> find_array2(const std::string& name)
+    {
+        std::vector<data_notifier<Object>*> v;
+
+        std::pair<data_notifier<Object>*,std::size_t> p = _segment->find<data_notifier<Object>>(name.c_str());
+        for (std::size_t i = 0; i < p.second; ++i)
+            v.push_back(p.first++);
+
+        return v;
+    }
 
 private:
 	const std::string _name;

@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
 	auto usets = server->construct<shared_sets>("shared_sets", 16);
 	std::vector<shm::data<shared_sets>*> sets = *usets;
 
-	auto current_set = server->construct<std::size_t>("current_set");
+	auto curr_set = server->construct<current_set>("current_set");
 
 	auto start = std::chrono::steady_clock::now();
 	int64_t ops = 0;
@@ -72,9 +72,11 @@ int main(int argc, char *argv[])
             }
 		}
 
-		current_set->modify([&](std::size_t& s)
+		curr_set->modify([&](current_set& s)
 		{
-			s = *current;
+            s.set_index = *current;
+            s.new_set = true;
+            s.cond_new_set.notify_all();
 		});
 
 		auto now = std::chrono::steady_clock::now();

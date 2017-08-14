@@ -41,28 +41,28 @@ namespace ipc = boost::interprocess;
 template <typename Object>
 struct data
 {
-	explicit data() :
-	  _obj{}
-	{}
+    explicit data() :
+      _obj{}
+    {}
 
-	explicit data(const void_allocator& sm) :
-	  _obj{sm}
-	{}
+    explicit data(const void_allocator& sm) :
+      _obj{sm}
+    {}
 
-	data(const data&) =delete;
-	data& operator=(const data&) =delete;
+    data(const data&) =delete;
+    data& operator=(const data&) =delete;
 
-	data(data&& d) :
-	  _mutex(std::move(d._mutex)),
-	  _obj(std::move(d._obj))
-	{}
+    data(data&& d) :
+      _mutex(std::move(d._mutex)),
+      _obj(std::move(d._obj))
+    {}
 
-	data& operator=(data&& d)
-	{
-		_mutex = std::move(d._mutex);
-		_obj = std::move(d._obj);
-		return *this;
-	}
+    data& operator=(data&& d)
+    {
+        _mutex = std::move(d._mutex);
+        _obj = std::move(d._obj);
+        return *this;
+    }
 
     template <typename Callable>
     void read(Callable f) const
@@ -103,8 +103,91 @@ struct data
     }
 
 private:
-	mutable ipc::interprocess_upgradable_mutex _mutex;
-	Object _obj;
+    mutable ipc::interprocess_upgradable_mutex _mutex;
+    Object _obj;
+};
+
+template <typename Object>
+struct data_notifier
+{
+    explicit data_notifier() :
+      _obj{}
+    {}
+
+    explicit data_notifier(const void_allocator& sm) :
+      _obj{sm}
+    {}
+
+    data_notifier(const data_notifier&) =delete;
+    data_notifier& operator=(const data_notifier&) =delete;
+
+    data_notifier(data_notifier&& d) :
+      _mutex(std::move(d._mutex)),
+      _obj(std::move(d._obj))
+    {}
+
+    data_notifier& operator=(data_notifier&& d)
+    {
+        _mutex = std::move(d._mutex);
+        _obj = std::move(d._obj);
+        return *this;
+    }
+
+    template <typename Callable>
+    void read(Callable f) const
+    {
+        ipc::scoped_lock<ipc::interprocess_mutex> lock{_mutex};
+        f(_obj);
+    }
+
+    template <typename Callable>
+    void read_lock(Callable f) const
+    {
+        ipc::scoped_lock<ipc::interprocess_mutex> lock{_mutex};
+        f(_obj, lock);
+    }
+
+    template <typename Callable>
+    bool try_read(Callable f) const
+    {
+        ipc::scoped_lock<ipc::interprocess_mutex> lock{_mutex, ipc::try_to_lock};
+        if (lock.owns())
+        {
+            f(_obj);
+            return true;
+        }
+        return false;
+    }
+
+    template <typename Callable>
+    void modify(Callable f)
+    {
+        ipc::scoped_lock<ipc::interprocess_mutex> lock{_mutex};
+        f(_obj);
+    }
+
+    template <typename Callable>
+    void modify_lock(Callable f)
+    {
+        ipc::scoped_lock<ipc::interprocess_mutex> lock{_mutex};
+        f(_obj, lock);
+    }
+
+    template <typename Callable>
+    bool try_modify(Callable f)
+    {
+        ipc::scoped_lock<ipc::interprocess_mutex> lock{_mutex, ipc::try_to_lock};
+        if (lock.owns())
+        {
+            f(_obj);
+            return true;
+        }
+        return false;
+    }
+
+private:
+    mutable ipc::interprocess_mutex _mutex;
+    Object _obj;
 };
 
 }
