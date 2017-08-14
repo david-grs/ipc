@@ -41,8 +41,12 @@ namespace ipc = boost::interprocess;
 template <typename Object>
 struct data
 {
+	explicit data() :
+	  _obj{}
+	{}
+
 	explicit data(const void_allocator& sm) :
-	  _obj(sm)
+	  _obj{sm}
 	{}
 
 	data(const data&) =delete;

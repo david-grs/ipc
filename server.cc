@@ -16,9 +16,6 @@ extern "C"
 // boo
 volatile bool run = true;
 
-//
-// - allocate N sets
-// - populate 1st
 int main(int argc, char *argv[])
 {
 	auto server = std::make_unique<shm::server>("foob4r");
@@ -27,7 +24,7 @@ int main(int argc, char *argv[])
 	auto usets = server->construct<shared_data>("shared_data", 16);
 	std::vector<shm::data<shared_data>*> sets = *usets;
 
-//	auto current_set = server->construct<std::size_t>("current_set");
+	auto current_set = server->construct<std::size_t>("current_set");
 
 	auto start = std::chrono::steady_clock::now();
 	int64_t ops = 0;
@@ -73,10 +70,10 @@ int main(int argc, char *argv[])
 			}
 		});
 
-	//	current_set->modify([&](std::size_t& s)
-	//	{
-	//		s = *current;
-	//	});
+		current_set->modify([&](std::size_t& s)
+		{
+			s = *current;
+		});
 
 		// send notification
 
